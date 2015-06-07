@@ -70,176 +70,170 @@ var Segment = function(p1, p2) {
 			this.p2.x - this.p1.x);
 		};
 
-					    this.init();
+		this.init();
 };
 
 var Ball = function(hue, r, o, v) {
-	    var k = EXPLAIN_MODE ? 4 : 1,
-			        l = (9 - k) * 10;
+	var k = EXPLAIN_MODE ? 4 : 1,
+		l = (9 - k) * 10;
 
-		    this.hue = hue || rand(360, 0, 1);
-			    this.c = 'hsl(' + this.hue + ',100%,' + l + '%)';
+		this.hue = hue || rand(360, 0, 1);
+		this.c = 'hsl(' + this.hue + ',100%,' + l + '%)';
 
-				    this.r = r || rand(k * 32, k * 8, 1);
+		this.r = r || rand(k * 32, k * 8, 1);
 
-					    this.o = o || null;
+		this.o = o || null;
 
-						    this.init = function() {
-								        if (!this.o) {
-											            this.o = {
-															                'x': rand(w - this.r, this.r, 1),
-																			                'y': rand(h - this.r, this.r, 1)
-																								            };
-														        }
+		this.init = function() {
+		if (!this.o) {
+			this.o = {
+				'x': rand(w - this.r, this.r, 1),
+				'y': rand(h - this.r, this.r, 1)
+				};
+			}
 
-										        if (!this.v) {
-													            this.v = {
-																	                'x': randSign() * rand(sqrt(k) * 4, k),
-																					                'y': randSign() * rand(sqrt(k) * 4, k)
-																										            };
-																        }
-												    };
+		if (!this.v) {
+			this.v = {
+				'x': randSign() * rand(sqrt(k) * 4, k),
+				'y': randSign() * rand(sqrt(k) * 4, k)
+			};
+		}
+	};
 
-							    this.handleWallHits = function(dir, lim, f) {
-									        var cond = (f === 'up') ?
-												            (this.o[dir] > lim) :
-															            (this.o[dir] < lim);
+	this.handleWallHits = function(dir, lim, f) {
+		var cond = (f === 'up') ? (this.o[dir] > lim) : (this.o[dir] < lim);
+		if (cond) {
+			this.o[dir] = lim;
+			this.v[dir] *= -1;
+		}
+	};
 
-											        if (cond) {
-														            this.o[dir] = lim;
-																	            this.v[dir] *= -1;
-																				        }
-													    };
+	this.keepInBounds = function() {
+		this.handleWallHits('x', this.r, 'low');
+		this.handleWallHits('x', w - this.r, 'up');
+		this.handleWallHits('y', this.r, 'low');
+		this.handleWallHits('y', h - this.r, 'up');
+	};
 
-								    this.keepInBounds = function() {
-										        this.handleWallHits('x', this.r, 'low');
-												        this.handleWallHits('x', w - this.r, 'up');
-														        this.handleWallHits('y', this.r, 'low');
-																        this.handleWallHits('y', h - this.r, 'up');
-																		    };
+	this.move = function() {
+		this.o.x += this.v.x;
+		this.o.y += this.v.y;
 
-									    this.move = function() {
-											        this.o.x += this.v.x;
-													        this.o.y += this.v.y;
+		this.keepInBounds();
+	};
 
-															        this.keepInBounds();
-																	    };
+	this.distanceTo = function(p) {
+		return hypot(this.o.x - p.x, this.o.y - p.y);
+	};
 
-										    this.distanceTo = function(p) {
-												        return hypot(this.o.x - p.x, this.o.y - p.y);
-														    };
+	this.collidesWith = function(b) {
+		return this.distanceTo(b.o) < (this.r + b.r);
+	};
 
-											    this.collidesWith = function(b) {
-													        return this.distanceTo(b.o) < (this.r + b.r);
-															    };
+	this.handleBallHit = function(b, ctxt) {
+		var θ1, θ2,
 
-												    this.handleBallHit = function(b, ctxt) {
-														        var θ1, θ2,
+		/* the normal segment */
+		ns = new Segment(this.o, b.o),
 
-																	            /* the normal segment */
-																	            ns = new Segment(this.o, b.o),
+		/* contact point */
+		cp = {
+			'x': μ([this.o.x, b.o.x], [b.r, this.r]),
+			'y': μ([this.o.y, b.o.y], [b.r, this.r])
+		};
 
-																				            /* contact point */
-																				            cp = {
-																								                'x': μ([this.o.x, b.o.x], [b.r, this.r]),
-																												                'y': μ([this.o.y, b.o.y], [b.r, this.r])
-																																	            };
+		this.cs = {
+			'x': σ(cp.x - this.o.x),
+			'y': σ(cp.y - this.o.y)
+		};
+		b.cs = {
+			'x': σ(cp.x - b.o.x),
+			'y': σ(cp.y - b.o.y)
+		};
 
-																        this.cs = {
-																			            'x': σ(cp.x - this.o.x),
-																						            'y': σ(cp.y - this.o.y)
-																										        };
-																		        b.cs = {
-																					            'x': σ(cp.x - b.o.x),
-																								            'y': σ(cp.y - b.o.y)
-																												        };
+		this.o = {
+			'x': cp.x - this.cs.x * this.r * abs(cos(ns.α)),
+			'y': cp.y - this.cs.y * this.r * abs(sin(ns.α))
+		};
+        b.o = {
+			'x': cp.x - b.cs.x * b.r * abs(cos(ns.α)),
+			'y': cp.y - b.cs.y * b.r * abs(sin(ns.α))
+		};
 
-																				        this.o = {
-																							            'x': cp.x -
-																											                this.cs.x * this.r * abs(cos(ns.α)),
-																										            'y': cp.y -
-																														                this.cs.y * this.r * abs(sin(ns.α))
-																																		        };
-																						        b.o = {
-																									            'x': cp.x - b.cs.x * b.r * abs(cos(ns.α)),
-																												            'y': cp.y - b.cs.y * b.r * abs(sin(ns.α))
-																																        };
+		if (EXPLAIN_MODE) {
+		    ctxt.clearRect(0, 0, w, h);
+			this.draw(ctxt);
+			b.draw(ctxt);
 
-																								        if (EXPLAIN_MODE) {
-																											            ctxt.clearRect(0, 0, w, h);
-																														            this.draw(ctxt);
-																																	            b.draw(ctxt);
+			this.connect(b, ctxt);
+		}
 
-																																				            this.connect(b, ctxt);
-																																							        }
+	    this.v.α = atan2(this.v.y, this.v.x);
+		b.v.α = atan2(b.v.y, b.v.x);
 
-																										        this.v.α = atan2(this.v.y, this.v.x);
-																												        b.v.α = atan2(b.v.y, b.v.x);
+		this.v.val = hypot(this.v.y, this.v.x);
+		b.v.val = hypot(b.v.y, b.v.x);
 
-																														        this.v.val = hypot(this.v.y, this.v.x);
-																																        b.v.val = hypot(b.v.y, b.v.x);
+		θ1 = ns.α - this.v.α;
+		θ2 = ns.α - b.v.α;
 
-																																		        θ1 = ns.α - this.v.α;
-																																				        θ2 = ns.α - b.v.α;
+		this.v.α -= PI - 2 * θ1;
+		b.v.α -= PI - 2 * θ2;
 
-																																						        this.v.α -= PI - 2 * θ1;
-																																								        b.v.α -= PI - 2 * θ2;
+		this.v.x = this.v.val * cos(this.v.α);
+		this.v.y = this.v.val * sin(this.v.α);
 
-																																										        this.v.x = this.v.val * cos(this.v.α);
-																																												        this.v.y = this.v.val * sin(this.v.α);
-
-																																														        b.v.x = b.v.val * cos(b.v.α);
-																																																        b.v.y = b.v.val * sin(b.v.α);
+		b.v.x = b.v.val * cos(b.v.α);
+		b.v.y = b.v.val * sin(b.v.α);
 
 																																																		        if (EXPLAIN_MODE) {
-																																																					            ctxt.setLineDash([0]);
-																																																								            this.drawV(ctxt, 'gold');
-																																																											            b.drawV(ctxt, 'blue');
+			ctxt.setLineDash([0]);
+			this.drawV(ctxt, 'gold');
+			b.drawV(ctxt, 'blue');
 
-																																																														            running = false;
-																																																																	            cancelAnimationFrame(r_id);
-																																																																				        }
-																																																				    };
+			running = false;
+			cancelAnimationFrame(r_id);
+		}
+	};
 
-													    this.connect = function(b, ctxt) {
-															        ctxt.strokeStyle = '#fff';
-																	        ctxt.setLineDash([5]);
+	this.connect = function(b, ctxt) {
+		ctxt.strokeStyle = '#fff';
+		ctxt.setLineDash([5]);
 
-																			        ctxt.beginPath();
-																					        ctxt.moveTo(this.o.x, this.o.y);
-																							        ctxt.lineTo(b.o.x, b.o.y);
-																									        ctxt.closePath();
-																											        ctxt.stroke();
-																													    };
+		ctxt.beginPath();
+		ctxt.moveTo(this.o.x, this.o.y);
+		ctxt.lineTo(b.o.x, b.o.y);
+		ctxt.closePath();
+		ctxt.stroke();
+	};
 
-														    this.drawV = function(ctxt, lc) {
-																        var m = 32;
+	this.drawV = function(ctxt, lc) {
+		var m = 32;
 
-																		        ctxt.strokeStyle = lc || this.c;
+		ctxt.strokeStyle = lc || this.c;
 
-																				        ctxt.beginPath();
-																						        ctxt.moveTo(this.o.x, this.o.y);
-																								        ctxt.lineTo(this.o.x + m * this.v.x,
-																												            this.o.y + m * this.v.y);
-																										        ctxt.closePath();
-																												        ctxt.stroke();
-																														    };
+		ctxt.beginPath();
+		ctxt.moveTo(this.o.x, this.o.y);
+		ctxt.lineTo(this.o.x + m * this.v.x,
+		this.o.y + m * this.v.y);
+		ctxt.closePath();
+		ctxt.stroke();
+	};
 
-															    this.draw = function(ctxt) {
-																	        ctxt.strokeStyle = this.c;
+    this.draw = function(ctxt) {
+		ctxt.strokeStyle = this.c;
 
-																			        ctxt.beginPath();
-																					        ctxt.arc(this.o.x, this.o.y, this.r,
-																									            0, 2 * PI);
-																							        ctxt.closePath();
-																									        ctxt.stroke();
+		ctxt.beginPath();
+		ctxt.arc(this.o.x, this.o.y, this.r, 0, 2 * PI);
+		ctxt.closePath();
+		ctxt.stroke();
 
-																											        if (EXPLAIN_MODE) {
-																														            this.drawV(ctxt);
-																																	        }
-																													    };
+		if (EXPLAIN_MODE) {
+			this.drawV(ctxt);
+		}
+	};
 
-																    this.init();
+    this.init();
 };
 
 var init = function() {
@@ -303,15 +297,14 @@ var draw = function() {
 };
 
 setTimeout(function() {
-		    init();
+	init();
 
-			    addEventListener('resize', init, false);
-				    c.addEventListener('dblclick', init, false);
-					    addEventListener('keydown', function(e) {
-							        if (e.keyCode == 13) {
-									            //EXPLAIN_MODE = !EXPLAIN_MODE;
-									            //init();
-									        }
-											    }, false);
-						}, 15);
-
+	addEventListener('resize', init, false);
+	c.addEventListener('dblclick', init, false);
+	addEventListener('keydown', function(e) {
+		if (e.keyCode == 13) {
+			//EXPLAIN_MODE = !EXPLAIN_MODE;
+			//init();
+		}
+	}, false);
+}, 15);
