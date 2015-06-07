@@ -37,7 +37,7 @@ var μ = function(values, weights) {
 		return num / den;
 }
 
-var N_BALLS = 32,
+var N_BALLS = 12,
 	EXPLAIN_MODE = false,
 	balls = [],
 	c = document.querySelector('canvas'),
@@ -197,36 +197,36 @@ var Ball = function(hue, r, o, v) {
 	};
 
 	this.connect = function(b, ctxt) {
-		ctxt.strokeStyle = '#fff';
+		ctxt.fillStyle = '#fff';
 		ctxt.setLineDash([5]);
 
 		ctxt.beginPath();
 		ctxt.moveTo(this.o.x, this.o.y);
 		ctxt.lineTo(b.o.x, b.o.y);
 		ctxt.closePath();
-		ctxt.stroke();
+		ctxt.fill();
 	};
 
 	this.drawV = function(ctxt, lc) {
 		var m = 32;
 
-		ctxt.strokeStyle = lc || this.c;
+		ctxt.fillStyle = lc || this.c;
 
 		ctxt.beginPath();
 		ctxt.moveTo(this.o.x, this.o.y);
 		ctxt.lineTo(this.o.x + m * this.v.x,
 		this.o.y + m * this.v.y);
 		ctxt.closePath();
-		ctxt.stroke();
+		ctxt.fill();
 	};
 
     this.draw = function(ctxt) {
-		ctxt.strokeStyle = this.c;
+		ctxt.fillStyle = this.c;
 
 		ctxt.beginPath();
 		ctxt.arc(this.o.x, this.o.y, this.r, 0, 2 * PI);
 		ctxt.closePath();
-		ctxt.stroke();
+		ctxt.fill();
 
 		if (EXPLAIN_MODE) {
 			this.drawV(ctxt);
