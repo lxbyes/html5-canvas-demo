@@ -54,3 +54,21 @@ var draw2 = function() {
 }
 
 draw2();
+
+var draw3 = function() {
+	x = 200;
+	y = 200;
+
+	ctx.strokeStyle = '#fe4543';
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+
+	while(x<200+200*Math.PI) {
+		x += 0.1;
+		y = 200 + 25*Math.sin(0.2*x);
+		ctx.lineTo(x, y);
+	}
+	ctx.stroke();
+}
+
+draw3();
