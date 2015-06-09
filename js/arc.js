@@ -72,3 +72,21 @@ var draw3 = function() {
 }
 
 draw3();
+
+var draw4 = function() {
+	x = 0;
+	y = 400;
+
+	ctx.strokeStyle = '#8907ab';
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+
+	while(x*x < 180000) {
+		x += 0.1;
+		y = Math.sqrt(180000 - Math.pow(x-1,2));
+		ctx.lineTo(x, y);
+	}
+	ctx.stroke();
+}
+
+draw4();
