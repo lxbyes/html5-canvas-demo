@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<title>CSS3 Animation Demo</title>
+		<style>
+			.ch-width {
+				width: 100px;
+				height: 10px;
+				background-color: #f00;
+				transition: width 2s;
+				-moz-transition: width 2s;	/* Firefox 4 */
+				-webkit-transition:  2s;	/* Safari 和 Chrome */
+				-o-transition: width 2s;	/* Opera */
+
+				-webkit-animation: chposition 3s;
+			}
+			.ch-width:hover {
+				width: 300px;
+				background-color: #0f0;
+			}
+
+			@-webkit-keyframes chposition {
+				from {width:10px;height:20px;background-color: #123456;}
+				to {width: 100px; height: 80px;background-color: #fedcba;}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ch-width"></div>
+	</body>
+</html>
