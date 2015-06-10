@@ -6,8 +6,10 @@ var x = 20, y = 20;
 var vx = 5, ax = 0.4;
 var vy = 5, ay = 0.7;
 var i = 0;
+
 canvas.width = 1000;
 canvas.height = 800;
+
 var draw = function() {
 	ctx.strokeStyle = '#fff';
 	ctx.beginPath();
@@ -38,15 +40,24 @@ var draw2 = function() {
 	y = 20;
 	vx = 5;
 	vy = 2;
+	var ax = -0.05;
+	var ay = 0;
+	var i = 0;
 	ctx.strokeStyle = '#6789fe';
 	ctx.beginPath();
 	ctx.moveTo(x, y);
-	while(vx > -5) {
-		vx -= 0.05;
+	while(++i < 10000) {
+		vx += ax;
+		vy += ay;
 		x += vx;
 		y += vy;
-		if(y<1000 && vx < -4.5) {
-			vx = 6;
+		if(y<1000 && (vx < -4.5 || vx > 6)) {
+			vx = 3;
+			ax = -ax;
+			//ay = -0.08;
+		}
+		if(y<1000 && (vy < - 3.0 || vy > 3)) {
+			vy = 3;
 		}
 		ctx.lineTo(x, y);
 	}
